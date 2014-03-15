@@ -3,21 +3,20 @@ var aviso = require('../models/aviso').aviso;
 var request = require("request");
 var cheerio = require("cheerio");
 
+var url = "http://www.bumeran.com.ar/empleos-publicacion-hoy.html";
+
 exports.start = function(req, res) {
-    for(var i = 0; i < 1; i++){
-        var url = "http://www.bumeran.com.ar/empleos-publicacion-hoy.html";
-        request(url, ( function(i) {
-            return function(err, resp, body) {
-                if (err && resp.statusCode == 200) {
-                  console.log(err);//throw err;
-                }
-                $ = cheerio.load(body);
-                var pages = $(".paginador.box a:nth-last-child(2)").text().trim();
-                console.log(pages); 
-                scraper(pages);
-            };
-        })(i));
-    }
+    request(url, function() {
+        return function(err, resp, body) {
+            if (err && resp.statusCode == 200) {
+                console.log(err); //throw err;
+            }
+            $ = cheerio.load(body);
+            var pages = $(".paginador.box a:nth-last-child(2)").text().trim();
+            console.log(pages); 
+            scraper(pages);
+        };
+    });
 };
 
 function scraper(pages) {
@@ -26,7 +25,7 @@ function scraper(pages) {
         request(url, ( function(i) {
             return function(err, resp, body) {
                 if (err && resp.statusCode == 200){
-                  console.log(err);//throw err;
+                  console.log(err); //throw err;
                 }
                 $ = cheerio.load(body);
                 $(".aviso_box.aviso_listado").each(function(index, tr) {
@@ -42,8 +41,7 @@ function scraperLinks(link) {
     var url = "http://www.bumeran.com.ar" + link;
     request(url, function(err, resp, body) {
             if (err && resp.statusCode == 200) { console.log(err); } //throw err;
-            $ = cheerio.load(body);
-            //console.log(body); 
+            $ = cheerio.load(body);            //console.log(body); 
             var location = $('.aviso-resumen-datos tr td').last().text().trim(); // $('#.aviso-resumen-datos tr').last().find( "a" ).text();
             var detail = $("#contenido_aviso p:nth-child(2)").text();//$("#contenido_aviso p").first().text();
             var title = $(".box h2").first().text().trim();
@@ -91,7 +89,7 @@ exports.jobs = function(req, res) {
           res.json(500, { message: err });
         }
     });
-    }else{
+    } else {
     aviso.findONe({ name: { $regex: new RegExp(searchterm, "i") } }, function(err, docs) {  // Using RegEx - search is case insensitive
         if(!err && !docs) {
             if(!err) {
